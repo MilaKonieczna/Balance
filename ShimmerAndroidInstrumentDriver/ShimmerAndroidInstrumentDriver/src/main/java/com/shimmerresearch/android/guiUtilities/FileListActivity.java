@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 
+import android.support.v4.content.FileProvider;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,7 +14,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 
-import androidx.core.content.FileProvider;
 
 import com.shimmerresearch.androidinstrumentdriver.R;
 

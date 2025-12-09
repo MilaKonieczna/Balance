@@ -151,18 +151,15 @@ import com.shimmerresearch.androidinstrumentdriver.R;
 import com.shimmerresearch.bluetooth.BluetoothProgressReportPerCmd;
 import com.shimmerresearch.bluetooth.ShimmerBluetooth;
 import com.shimmerresearch.driver.CallbackObject;
-import com.shimmerresearch.driver.Configuration.COMMUNICATION_TYPE;
-
+import com.shimmerresearch.driver.Configuration;
 import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 import com.shimmerresearch.driver.ShimmerMsg;
 import com.shimmerresearch.driver.shimmer2r3.ConfigByteLayoutShimmer3;
-import com.shimmerresearch.driver.shimmer4sdk.Shimmer4sdk;
 import com.shimmerresearch.driverUtilities.ShimmerBattStatusDetails;
-import com.shimmerresearch.driverUtilities.ShimmerVerDetails;
 import com.shimmerresearch.driverUtilities.UtilShimmer;
 import com.shimmerresearch.exceptions.ShimmerException;
-import com.shimmerresearch.exgConfig.ExGConfigOptionDetails;
+
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -184,7 +181,7 @@ import it.gerdavax.easybluetooth.LocalDevice;
 import it.gerdavax.easybluetooth.RemoteDevice;
 //import java.io.FileOutputStream;
 
-public class Shimmer extends ShimmerBluetooth{
+public class Shimmer extends ShimmerBluetooth {
 	//generic UUID for serial port protocol
 	private UUID mSPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	// Message types sent from the Shimmer Handler
@@ -1766,7 +1763,7 @@ public class Shimmer extends ShimmerBluetooth{
 
 	@Override
 	protected void interpretDataPacketFormat(Object object,
-			COMMUNICATION_TYPE commType) {
+			Configuration.COMMUNICATION_TYPE commType) {
 	}
 
 	@Override

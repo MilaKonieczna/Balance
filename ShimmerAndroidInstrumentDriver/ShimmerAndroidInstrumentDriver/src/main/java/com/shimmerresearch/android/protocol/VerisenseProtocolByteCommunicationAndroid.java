@@ -3,8 +3,8 @@ package com.shimmerresearch.android.protocol;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.provider.DocumentFile;
 
-import androidx.documentfile.provider.DocumentFile;
 
 import com.shimmerresearch.exceptions.ShimmerException;
 import com.shimmerresearch.tools.FileUtils;

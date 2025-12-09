@@ -4,8 +4,8 @@ package com.shimmerresearch.android.guiUtilities.supportfragments;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.ListFragment;
+
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
@@ -20,7 +20,7 @@ import com.shimmerresearch.driver.ShimmerDevice;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * A simple {@linkFragment} subclass.
  * Use the {@link ConnectedShimmersListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */

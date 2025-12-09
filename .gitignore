@@ -2,6 +2,18 @@ ShimmerAndroidInstrumentDriver/build/generated/mockable-android-19.jar
 ShimmerAndroidInstrumentDriver/build/generated/mockable-android-21.jar
 ShimmerAndroidInstrumentDriver/gradle.properties
 
+ShimmerAndroidInstrumentDriver/bluetoothManagerExample/
+ShimmerAndroidInstrumentDriver/efficientDataArrayExample/
+ShimmerAndroidInstrumentDriver/multiverisenseblebasicexample/
+ShimmerAndroidInstrumentDriver/shimmer3BLEBasicExample/
+ShimmerAndroidInstrumentDriver/shimmerBasicExample/
+ShimmerAndroidInstrumentDriver/shimmerConnectionTest/
+ShimmerAndroidInstrumentDriver/shimmerLegacyExample/
+ShimmerAndroidInstrumentDriver/shimmerServiceExample/
+ShimmerAndroidInstrumentDriver/shimmerspeedtest/
+ShimmerAndroidInstrumentDriver/verisenseBLEBasicExample/
+ShimmerAndroidInstrumentDriver/shimmer3BLEBasicExample/
+
 # Built application files
 *.apk
 *.aar

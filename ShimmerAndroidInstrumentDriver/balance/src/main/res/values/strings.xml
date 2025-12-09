@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">balance</string>
+    <string name="accelerometer_x_axis">Accelerometer X axis</string>
+    <string name="patient_s_name">Patient\'s Name</string>
+    <string name="accelerometer_y_axis">Accelerometer Y axis</string>
+    <string name="accelerometer_z_axis">Accelerometer Z axis</string>
+    <string name="gyroscope">Gyroscope</string>
+    <string name="emg">EMG</string>
+    <string name="Continue">Continue</string>
+    <string name="connect">Connect</string>
+    <string name="stop_streaming">Stop Streaming</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="start_streaming">Start Streaming</string>
+    <string name="_2_00">2:00</string>
+    <string name="analyze">Analyze</string>
+    <string name="gyroscope_y_axis">Gyroscope Y axis</string>
+    <string name="gyroscope_x_axis">Gyroscope X axis</string>
+    <string name="gyroscope_z_axis">Gyroscope Z axis</string>
+    <string name="analyze_data">Analyze Data</string>
+    <string name="collect_data">Collect Data</string>
+    <string name="stasis">stasis</string>
+</resources>
