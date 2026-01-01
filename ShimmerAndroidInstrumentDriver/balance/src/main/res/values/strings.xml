@@ -19,4 +19,6 @@
     <string name="analyze_data">Analyze Data</string>
     <string name="collect_data">Collect Data</string>
     <string name="stasis">stasis</string>
+    <string name="visualize">Visualize</string>
+    <string name="choose_file">Choose file</string>
 </resources>

@@ -57,9 +57,10 @@ allprojects {
                     gpr.usr=GITHUB_USER_ID 
                     gpr.key=PERSONAL_ACCESS_TOKEN 
                 */
+
                 username = project.findProperty("gpr.usr") ?: System.getenv("USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-		        /* should the above not work key in your username and password directly e.g.
+		        /*  the above not work key in your username and password directly e.g.
   		        username = "username"
   		        password = "password"
                 DO NOT commit your username and password
@@ -85,7 +86,6 @@ allprojects {
                     exclude group: 'com.google.protobuf'
                     exclude group: 'org.apache.commons.math'
                 }
-
                 implementation (group: 'com.shimmerresearch', name: 'shimmerdriver', version:'0.11.0_beta'){
 
                     // excluding org.json which is provided by Android

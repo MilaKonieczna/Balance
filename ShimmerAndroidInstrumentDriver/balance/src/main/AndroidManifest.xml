@@ -21,14 +21,14 @@
         android:theme="@style/Theme.ShimmerAndroidInstrumentDriver"
         android:requestLegacyExternalStorage="true">
 
-        <activity android:name=".StartActivity"
+        <activity android:name=".CollectActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CollectActivity"
+        <activity android:name=".VisualizeActivity"
             android:exported="true">
         </activity>
         <provider

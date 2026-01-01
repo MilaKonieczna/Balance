@@ -1,8 +1,9 @@
-package com.example.balance;
+    package com.example.balance;
 
 import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -33,8 +34,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
 import com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog;
@@ -50,9 +51,10 @@ import com.shimmerresearch.exceptions.ShimmerException;
 import java.io.BufferedWriter;
 import java.io.File;
 import android.support.v4.content.FileProvider;
+import android.widget.Toast;
+
 import java.io.FileWriter;
 import java.io.IOException;
-
 
 public class CollectActivity extends AppCompatActivity {
 
@@ -76,8 +78,10 @@ public class CollectActivity extends AppCompatActivity {
 
     ShimmerBluetoothManagerAndroid.BT_TYPE preferredBtType;
 
-    Button connectButton, startButton;
+    Button connectButton, startButton, visualizeButton;
     TextView clock;
+
+    ScrollView scrollView;
     boolean isConnected = false;
     boolean isStreaming = false;
     int timeSeconds = 120;
@@ -89,7 +93,7 @@ public class CollectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_collect);
+        setContentView(R.layout.activity_connect);
 
         patientET = findViewById(R.id.patient);
         xAxisCB = findViewById(R.id.Xaxis);
@@ -107,7 +111,10 @@ public class CollectActivity extends AppCompatActivity {
         connectButton = findViewById(R.id.connect);
         startButton = findViewById(R.id.start);
         clock = findViewById(R.id.clock);
+        visualizeButton = findViewById(R.id.visualize);
+        scrollView = findViewById(R.id.scroll);
 
+        visualizeButton.setEnabled(false);
         startButton.setEnabled(false);
         startButton.setAlpha(0.5f);
 
@@ -116,22 +123,17 @@ public class CollectActivity extends AppCompatActivity {
         createNotificationChannel();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requestPermissions(new String[]{
+            ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.BLUETOOTH_SCAN,
                     Manifest.permission.BLUETOOTH_CONNECT,
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.POST_NOTIFICATIONS
             }, 101);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
         }
     }
 
-
-    public void back(View v) {
-        Intent intent = new Intent(CollectActivity.this, StartActivity.class);
-        startActivity(intent);
-    }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -150,14 +152,21 @@ public class CollectActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode != 101) {
+            return;
+        }
+
         boolean allPermissionsGranted = true;
         for (int result : grantResults) {
-            if (result != 0) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
                 allPermissionsGranted = false;
+                break;
             }
         }
+
         if (!allPermissionsGranted) {
-            Toast.makeText(this, "Please allow all requested permissions", Toast.LENGTH_SHORT).show();
         } else {
             BleManager.getInstance().init(getApplication());
             try {
@@ -176,7 +185,9 @@ public class CollectActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
+        if(receiver != null) {
+            unregisterReceiver(receiver);
+        }
     }
 
     @Override
@@ -202,8 +213,11 @@ public class CollectActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Stopped Shimmer Streaming and Logging");
             }
         }
-        btManager.disconnectAllDevices();
-        Log.i(LOG_TAG, "Shimmer DISCONNECTED");
+        if(btManager != null) {
+            btManager.disconnectAllDevices();
+            Log.i(LOG_TAG, "Shimmer DISCONNECTED");
+        }
+
 
         super.onStop();
     }
@@ -229,15 +243,12 @@ public class CollectActivity extends AppCompatActivity {
                         switch (state) {
                             case CONNECTED:
                                 isConnected = true;
-
                                 shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(macAddress);
-
                                 runOnUiThread(() -> {
                                     connectButton.setText(R.string.disconnect);
                                     connectButton.setBackgroundResource(R.drawable.disconnect_drawable);
                                     startButton.setEnabled(true);
                                     startButton.setAlpha(1f);
-                                    Toast.makeText(CollectActivity.this, "Connected", Toast.LENGTH_SHORT).show();
                                 });
                                 break;
 
@@ -246,8 +257,14 @@ public class CollectActivity extends AppCompatActivity {
                                 shimmerDevice = null;
                                 runOnUiThread(() -> {
                                     connectButton.setText(R.string.connect);
+                                    connectButton.setBackgroundResource(R.drawable.connect_drawable);
+
                                     startButton.setEnabled(false);
                                     startButton.setAlpha(0.5f);
+
+                                    if(isStreaming) {
+                                        stopStreaming(null);
+                                    }
                                 });
                                 break;
                         }
@@ -256,6 +273,7 @@ public class CollectActivity extends AppCompatActivity {
             }
         }
     };
+
     private void toggleInputs(boolean enabled) {
         patientET.setEnabled(enabled);
         xAxisCB.setEnabled(enabled);
@@ -327,19 +345,29 @@ public class CollectActivity extends AppCompatActivity {
             Log.e(LOG_TAG, "Error writing CSV: " + e.getMessage());
         }
     }
-    public void stopStreaming(View v) {
-        if (!isStreaming) return;
-        isStreaming = false;
 
+    public void startStreaming(View v) {
+        if (isStreaming) {
+            stopStreaming(v);
+        } else {
+            startStreamingLogic();
+        }
+    }
+
+    public void stopStreaming(View v) {
+        if (!isStreaming) {
+            return;
+        }
+
+        isStreaming = false;
+        stopTimer();
         toggleInputs(true);
 
-        stopTimer();
-
-        startButton.setText(R.string.start_streaming);
-        startButton.setBackgroundResource(R.drawable.start_drawable);
-
         try {
-            if (shimmerDevice != null) shimmerDevice.stopStreaming();
+            if (shimmerDevice != null && shimmerDevice.isStreaming()) {
+                shimmerDevice.stopStreaming();
+            }
+
             if (writeCSV != null) {
                 writeCSV.flush();
                 writeCSV.close();
@@ -347,15 +375,39 @@ public class CollectActivity extends AppCompatActivity {
 
                 if (currentFile != null && currentFile.exists()) {
                     showFileNotification(currentFile);
+                    visualizeButton.setEnabled(true);
+
+                    scrollView.post(() -> {
+                        int startY = scrollView.getScrollY();
+                        int endY = visualizeButton.getBottom();
+
+                        ValueAnimator animator = ValueAnimator.ofInt(startY, endY);
+                        animator.setDuration(1000);
+                        animator.addUpdateListener(animation -> {
+                            int scrollTo = (int) animation.getAnimatedValue();
+                            scrollView.scrollTo(0, scrollTo);
+                        });
+                        animator.start();
+                    });
+
                 }
             }
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Stream closing/Notification failed: " + e.getMessage());
+            Log.e(LOG_TAG, "Error while stopping stream: " + e.getMessage());
         }
+
+        startButton.setText(R.string.start_streaming);
+        startButton.setBackgroundResource(R.drawable.start_drawable);
+        startButton.setEnabled(true);
+        startButton.setAlpha(1f);
     }
-    public void startStreaming(View v) {
+
+    public void showVisualize(View v) {
+            startActivity(new Intent(this, VisualizeActivity.class));
+    }
+
+    private void startStreamingLogic() {
         if (shimmerDevice == null) {
-            Toast.makeText(this, "Device not connected!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -368,10 +420,12 @@ public class CollectActivity extends AppCompatActivity {
         zGyro = zGyroCB.isChecked();
         emg = emgCB.isChecked();
 
-        toggleInputs(false);
+        if (!(xAxis || yAxis || zAxis || xGyro || yGyro || zGyro || emg)) {
+            Toast.makeText(this, "Please select at least one signal to plot", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        isStreaming = true;
-        startButton.setText(R.string.stop_streaming);
+        toggleInputs(false);
 
         isStreaming = true;
         startButton.setText(R.string.stop_streaming);
@@ -419,13 +473,13 @@ public class CollectActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     public void connectDevice(View v) {
         if (!isConnected) {
             Intent intent = new Intent(this, ShimmerBluetoothDialog.class);
             startActivityForResult(intent, ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER);
         } else {
             disconnectDevice(v);
-            isConnected = false;
         }
     }
 
@@ -440,29 +494,41 @@ public class CollectActivity extends AppCompatActivity {
         isConnected = false;
         connectButton.setText(R.string.connect);
         connectButton.setBackgroundResource(R.drawable.connect_drawable);
-        stopStreaming(null);
+        if(isStreaming) {
+            stopStreaming(null);
+        }
         startButton.setEnabled(false);
         startButton.setAlpha(0.5f);
     }
 
 
     private void startTimer() {
+        stopTimer();
+
+        timeSeconds = 10;
+        updateClockText();
+
         timerRunnable = new Runnable() {
             @Override
             public void run() {
+                if (!isStreaming) {
+                    return;
+                }
+
                 timeSeconds--;
                 updateClockText();
 
-                if (timeSeconds > 0) {
+                if (timeSeconds > 0 && isStreaming) {
                     timerHandler.postDelayed(this, 1000);
                 } else {
-                    stopStreaming(null);
+                    runOnUiThread(() -> stopStreaming(null));
                 }
             }
         };
 
         timerHandler.postDelayed(timerRunnable, 1000);
     }
+
 
     private void stopTimer() {
         timerHandler.removeCallbacks(timerRunnable);
@@ -480,7 +546,7 @@ public class CollectActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 2 && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER && resultCode == Activity.RESULT_OK && data != null) {
 
             if (btManager == null) {
                 try {
@@ -552,7 +618,7 @@ public class CollectActivity extends AppCompatActivity {
 
             int flags;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags = PendingIntent.FLAG_UPDATE_CURRENT | 201326592;
+                flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
             } else {
                 flags = PendingIntent.FLAG_UPDATE_CURRENT;
             }
